@@ -1,0 +1,86 @@
+---
+title: "DCM, ICM, and NM Modeling with EpiModel"
+author: "David Wang"
+date: "May 24, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(ape)
+require(rCharts)
+require(EpiModel)
+require(reshape2)
+require(knitr)
+opts_chunk$set(comment = NA, results = "asis", comment = NA, tidy = F)
+```
+
+## Introduction
+
+This brief analysis will conduct exercises on the three types of modeling techniques presented in the **EpiModel** package. They are the DCM (Deterministic Compartmental Model), ICM (Individual Compartmental Model or Agent-based Model), and Network Model. Within these models, there are several types of sub-models to choose from such as *SI*,*SIR*, and *SIS*. For each model, the analysis is broken down into three steps: (1) Input parameters, (2) Arrange output, and (3) Visualize.
+
+## Simple DCM
+1.) Input and initialize necessary parameters.
+```{r dcm_input}
+param <- param.dcm(inf.prob = 0.50, act.rate = 0.50, rec.rate=0.05)
+init <- init.dcm(s.num = 999, r.num = 0, i.num = 1)
+control <- control.dcm(type = "SIR", nsteps = 365)
+mode <- dcm(param, init, control)
+```
+
+2.) Arrange output into dataframe and prepare it for custom visualization. 
+```{r dcm_arrange}
+
+results.df <- data.frame(mode)
+prevNames <- c("s.num", "r.num", "i.num","num", "time")
+incNames <- c("si.flow", "time")
+
+prevDF <- results.df[prevNames]
+incDF <- results.df[incNames]
+
+# Convert prevDF cols into percentages of 'num'
+percPrevDF <- prevDF
+percPrevDF[c("s.num","r.num","i.num")] <- prevDF[c("s.num", "r.num", "i.num")] / prevDF$num
+finalPrevNames <- c("s.num", "r.num", "i.num", "time")
+finalPrevDF <- percPrevDF[finalPrevNames]
+
+melt.prevDF <- melt(finalPrevDF, id="time")
+melt.incDF <- melt(incDF, id="time")
+
+# Clean dataframe
+melt.prevDFsub <- subset(melt.prevDF, !is.na(value))
+melt.prevDFsub <- subset(melt.prevDFsub, !is.infinite(value))
+
+# Prevalence values are between 0 and 1 only
+maxIsOne <- pmin(melt.prevDFsub$value, 1)
+melt.prevDFsub$value <- maxIsOne
+melt.prevDFsub$value[melt.prevDFsub$value <= 0] <- 0
+
+```
+
+3.) Create visualizations of Prevalence and Incidence versus Time.
+
+Prevalence vs. Time
+```{r dcm_vis_prev, echo=FALSE, cache=T, results='asis', comment=NA}
+# Create linechart
+p1 <- nPlot(value~time, group="variable", data = melt.prevDFsub, type = "lineChart")
+p1$set(range = range(melt.prevDF$time))
+p1$chart(yDomain = c(0, 1))
+p1$xAxis(axisLabel = 'Timestep')
+p1$yAxis(axisLabel = 'Prevalence')
+p1$print('chart1', include_assets = T)
+
+```
+Incidence vs. Time
+```{r dcm_vis_inc, echo=FALSE, cache=T, results='asis', comment=NA}
+#melt.incDF$value <- as.integer(melt.incDF$value)
+# melt.incDFsub <- subset(melt.incDF, !is.na(value))
+p2 <- nPlot(value~time, group="variable", data = melt.incDF, type = "lineChart")
+p2$set(range = range(melt.incDF$time))
+p2$xAxis(axisLabel = 'Timestep')
+p2$yAxis(axisLabel = 'Incidence')
+#p2$chart(margin=list(left=300))
+p2$print('chart2', include_assets = T)
+
+```
+
