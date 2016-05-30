@@ -12,52 +12,52 @@ shinyUI(navbarPage("SIR Analytical Tool V1",
                                                     
                                                     condition = "output.initUpload",
                                                     
-                                                    sliderInput("s.num", label=h4("Initial No. of Susceptable persons:"), 
+                                                    sliderInput("s.num", label=h5("Initial No. of Susceptable persons:"), 
                                                                 min=1, max=100000, value=50000),
                                                     
-                                                    sliderInput("i.num", label=h4("Initial No. of Infecteds:"), 
+                                                    sliderInput("i.num", label=h5("Initial No. of Infecteds:"), 
                                                                 min=1, max=100000, value=50000),
                                                     
-                                                    sliderInput("r.num", label=h4("Initial No. of Recovered persons:"), 
+                                                    sliderInput("r.num", label=h5("Initial No. of Recovered persons:"), 
                                                                 min=0, max=100000, value=0),
                                                     
                                                     h2("Parameters"),
                                                     p("Adjust the following parameters according to your desired output."),
                                                     
-                                                    sliderInput("inf.prob", label=h4("Probability of Transmission:"),
+                                                    sliderInput("inf.prob", label=h5("Probability of Transmission:"),
                                                                 min=0, max=1, value=0.5),
                                                     
-                                                    sliderInput("act.rate", label=h4("Acts per unit time:"),
+                                                    sliderInput("act.rate", label=h5("Acts per unit time:"),
                                                                 min=0, max=1, value=0.5),
                                                     
-                                                    sliderInput("rec.rate", label=h4("Recoveries per unit time:"), 
+                                                    sliderInput("rec.rate", label=h5("Recoveries per unit time:"), 
                                                                 min=0, max=1, value=0.5),
                                                     #### Start demographic inputs here ####
-                                                    sliderInput("b.rate", label=h4("Birth rate:"), 
+                                                    sliderInput("b.rate", label=h5("Birth rate:"), 
                                                                 min=0, max=1, value=0.5),
-                                                    sliderInput("ds.rate", label=h4("Mortality:"), 
+                                                    sliderInput("ds.rate", label=h5("Mortality:"), 
                                                                 min=0, max=1, value=0.5),
-                                                    sliderInput("dr.rate", label=h4("Recovered mortality:"), 
+                                                    sliderInput("dr.rate", label=h5("Recovered mortality:"), 
                                                                 min=0, max=1, value=0.5),
-                                                    sliderInput("di.rate", label=h4("Disease-induced mortality:"), 
+                                                    sliderInput("di.rate", label=h5("Disease-induced mortality:"), 
                                                                 min=0, max=1, value=0.5),
-                                                    sliderInput("inter.eff", label=h4("Intervention efficacy:"), 
+                                                    sliderInput("inter.eff", label=h5("Intervention efficacy:"), 
                                                                 min=0, max=1, value=0.5),
-                                                    sliderInput("inter.start", label=h4("Intervention Start Time:"), 
+                                                    sliderInput("inter.start", label=h5("Intervention Start Time:"), 
                                                                 min=1, max=200, value=0.5),
                                                     #### End demographic inputs here ####
-                                                    sliderInput("nsteps", label=h4("Number of timesteps:"), 
+                                                    sliderInput("nsteps", label=h5("Number of timesteps:"), 
                                                                 min=1, max=200, value=100),
                                                     
-                                                    actionButton("replot",icon = icon("spinner", "fa-spin"), label=h4("PLOT RESULTS"), width = 634.6)
+                                                    actionButton("replot",icon = icon("bar-chart", "fa-3x"), label=h3("PLOT RESULTS"))
                                                     # Dev-ref: http://fontawesome.io/icons/
                                                     
                                             )),
                                     mainPanel(
-                                            h3("DCM-SIR Results"),
-                                            plotlyOutput("result",height="auto", width="100%"),
+                                            plotOutput("result", height = "auto"),
                                             conditionalPanel(
-                                                    condition = "output.tb",
+                                                    h3("DCM-SIR File Inputs"),
+                                                    condition = "output.initUpload",
                                                     uiOutput("tb")
                                             )
                                     )
@@ -65,6 +65,3 @@ shinyUI(navbarPage("SIR Analytical Tool V1",
                    tabPanel("ICM SIR" , icon = icon("user", "fa-3x")),
                    tabPanel("SNM SIR" , icon = icon("arrows-alt", "fa-3x"))
 ))
-
-# Still have yet to add:
-# birth rate, mortality, di-mortality, and intervention parameters

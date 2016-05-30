@@ -161,34 +161,37 @@ shinyServer(function(input, output, session) {
                 control <- control.dcm(type = "SIR", nsteps = input$nsteps)
                 mod <- dcm(param, init, control)
                 
+                ### Old - for interactive visualization
                 # Store mod output as a dataframe
-                df <- as.data.frame(mod)
-                keeps <- c("s.num", "i.num", "r.num", "num", "time")
+                # df <- as.data.frame(mod)
+                # keeps <- c("s.num", "i.num", "r.num", "num", "time")
                 
                 # Create subset of dataframe with percentages of population
-                df <- df[keeps]
-                percDF <- df
-                percDF[c("s.num","r.num","i.num")] <- df[c("s.num", "r.num", "i.num")] / df$num
-                finalPrevNames <- c("s.num", "r.num", "i.num", "time")
-                finalPrevDF <- percDF[finalPrevNames]
+                # df <- df[keeps]
+                # percDF <- df
+                # percDF[c("s.num","r.num","i.num")] <- df[c("s.num", "r.num", "i.num")] / df$num
+                # finalPrevNames <- c("s.num", "r.num", "i.num", "time")
+                # finalPrevDF <- percDF[finalPrevNames]
                 
-                meltdf <- melt(finalPrevDF, id="time")
+                # meltdf <- melt(finalPrevDF, id="time")
                 
         })
         
         # Plotting the output with plot_ly
-        output$result <- renderPlotly({
+        output$result <- renderPlot({
+                plot(plotVal())
                 
+                ### Old - for interactive visualization
+                #plot <- ggplot(plotVal(),aes(x=time,y=value,colour=variable,group=variable)) 
+                #plot <- plot + geom_line(size=1, alpha=0.6)
+                #plot <- plot + theme(panel.background = element_rect(fill='white', colour="red"),
+                #                     axis.title.x = element_text(colour = "black"),
+                #                     axis.title.y = element_text(colour = "black", angle=45),
+                #                     panel.grid.major = element_line(colour = "gray91"))
+                #ggplotly(plot)
                 
-                plot <- ggplot(plotVal(),aes(x=time,y=value,colour=variable,group=variable)) 
-                plot <- plot + geom_line(size=1, alpha=0.6)
-                plot <- plot + theme(panel.background = element_rect(fill='white', colour="red"),
-                                     axis.title.x = element_text(colour = "black"),
-                                     axis.title.y = element_text(colour = "black", angle=45),
-                                     panel.grid.major = element_line(colour = "gray91"))
-                                                                     
-                ggplotly(plot)
-                
+        }, height = function() {
+                (session$clientData$output_result_width)*0.5
         })
         
 
