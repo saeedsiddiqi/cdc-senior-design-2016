@@ -1,0 +1,239 @@
+---
+title: "Chapter3"
+author: "David Wang"
+date: "June 2, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(igraph)
+```
+
+### Graph Layouts
+The graph layout is the placement of vertices and edges in space.
+```{r}
+library(sand)
+g.l <- graph.lattice(c(5,5,5))
+
+# Bring in example data and summarize
+data(aidsblog)
+aidsblog <- upgrade_graph(aidsblog)
+summary(aidsblog)
+```
+
+Exploring a circular layout:
+```{r}
+igraph.options(vertex.size=3, vertex.label=NA,
+               edge.arrow.size=0.5)
+
+# Set the plot output arrangement (1 row with 2 elements)
+par(mfrow=c(1,2))
+
+plot(g.l, layout=layout.circle) #layout.circle sets the circular boundaries
+title("5x5x5 Lattice")
+
+plot(aidsblog, layout=layout.circle)
+title("Blog Network")
+```
+
+Use `spring embedder` methods of graph drawing. (e.g. Fruchterman and Reingold method)
+```{r}
+# Plot same data again, but this time using a different layout method
+par(mfrow=c(1,2))
+
+plot(g.l, layout=layout.fruchterman.reingold)
+title("5x5x5 Lattice")
+
+plot(aidsblog, layout=layout.fruchterman.reingold)
+title("Blog Network")
+```
+
+Use `energy placement` methods of graph drawing. (e.g. Kamada and Kawai)
+```{r}
+par(mfrow=c(1,2))
+
+plot(g.l, layout=layout.kamada.kawai)
+title("5x5x5 Lattice")
+
+plot(aidsblog, layout=layout.kamada.kawai)
+title("Blog Network")
+```
+
+Sometimes we need special formatting. Take this case with tree graphs for example:
+```{r}
+g.tree <- graph.formula(1-+2, 1-+3, 1-+4, 2-+5, 2-+6, 2-+7,
+                        3-+8, 3-+9, 4-+10)
+
+# Set the plot output arrangement (1 row with 3 elements)
+par(mfrow=c(1,3))
+igraph.options(vertex.size=30, edge.arrow.size=0.5,
+               vertex.label=NULL)
+
+# Plot g.tree three different ways
+plot(g.tree, layout=layout.circle)
+title("Cirlce Layout")
+
+plot(g.tree, layout=layout.reingold.tilford(g.tree, circular=T))
+title("Reingold & Tilford (Radial)")
+
+plot(g.tree, layout=layout.reingold.tilford)
+title("Reingold & Tilford (Layered)")
+```
+
+### Decorating Graph Layouts
+
+One karate school splits into two karate schools with two leaders (Mr. Hi vs John A.)
+
+Using karate example in network analysis example:
+
+```{r}
+library(igraphdata)
+data(karate)
+
+# We set the seed so that the layout is reprod.
+set.seed(42)
+
+l <- layout.kamada.kawai(karate)
+
+# Plot without decoration (initially)
+igraph.options(vertex.size=10)
+par(mfrow=c(1,1))
+plot(karate, layout=l, vertex.label=V(karate))
+
+## Plot with decoration (the labels)
+# Just isolate the leaders here
+V(karate)$label <- sub("Actor ", "", V(karate)$name)
+
+# Assign all vertices to be a circle
+V(karate)$shape <- "circle"
+
+# Now assign the leaders to be a different shape from a circle
+V(karate)[c("Mr Hi", "John A")]$shape <- 'rectangle'
+
+# Differentiate the two schools by color
+V(karate)[Faction == 1]$color <- "red"
+V(karate)[Faction == 2]$color <- "dodgerblue"
+
+# Vertex area proportional to vertex strength
+V(karate)$size <- 4*sqrt(graph.strength(karate))
+V(karate)$size2 <- V(karate)$size * 0.5
+
+# Weight edges by the number of common activities
+E(karate)$width <- E(karate)$weight
+
+# Color edges by within/between faction.
+F1 <- V(karate)[Faction==1]
+F2 <- V(karate)[Faction==2]
+
+# School 1 to School 1 links are pink
+E(karate)[F1 %--% F1]$color <- "pink"
+
+# School 2 to School 2 links are lightblue
+E(karate)[F2 %--% F2]$color <- "lightblue"
+
+# School 1 to School 2 links are yellow
+E(karate)[F1 %--% F2]$color <- "yellow"
+
+## Offset vertex labels for smaller points so that it looks better
+# If the size of the vertex is greater than 10, no need for offset, ow offset by 0.75
+V(karate)$label.dist <-
+        ifelse(V(karate)$size >= 10, 0, 0.75)
+
+# Let's plot!
+plot(karate, layout=l)
+```
+
+We can conduct a similar analysis using the `lazega_lawyer` dataset from the last chapter:
+```{r}
+library(sand)
+data("lazega")
+lazega <- upgrade_graph(lazega)
+
+## Office location indicated by color
+# Replaces all 3 different possible numbers in original vector with color strings
+v.colors <- c("red", "dodgerblue", "goldenrod")[V(lazega)$Office]
+
+# Type of practice indicated by vertex shape
+v.shapes <- c("circle", "square")[V(lazega)$Practice]
+
+# Vertex size proportional to years with firm
+v.size <- 3.5*sqrt(V(lazega)$Years)
+
+# Label vertices according to seniority
+v.label <- V(lazega)$Seniority
+
+set.seed(42)
+
+l <- layout.fruchterman.reingold(lazega)
+plot(lazega, layout = l, vertex.color = v.colors,
+     vertex.shape = v.shapes, vertex.size = v.size,
+     vertex.label = v.label)
+```
+
+
+## Visualizing Large Networks
+As networks get larger, plots look more cluttered. E.g. blog example:
+```{r}
+library(sand)
+fblog <- upgrade_graph(fblog)
+summary(fblog)
+party.names <- sort(unique(V(fblog)$PolParty))
+# So much less clutter
+party.names
+
+# Use K-K method
+set.seed(42)
+l = layout.kamada.kawai(fblog)
+
+# Convert graph object into factor (categories)
+party.nums.f <- as.factor(V(fblog)$PolParty)
+
+# Convert factors into numbers
+party.nums <- as.numeric(party.nums.f)
+
+par(mfrow=c(1,2))
+plot(fblog, layout=l, vertex.label=NA,
+     vertex.color=party.nums, vertex.size=3)
+title("Kamada Kawai Method")
+
+# DrL algorithm
+set.seed(42)
+l <- layout.drl(fblog)
+plot(fblog, layout=l, vertex.size=5, vertex.label=NA,
+     vertex.color=party.nums)
+title("DrL Method")
+```
+
+Local vertex neighbors
+```{r}
+data(karate)
+k.nbhds <- graph.neighborhood(karate, order=1)
+
+# Find which ones have the largest clusters
+sapply(k.nbhds, vcount)
+
+# Plot the largest neighborhoods
+k.1 <- k.nbhds[[1]]
+k.34 <- k.nbhds[[34]]
+
+par(mfrow=c(1,2))
+plot(k.1, vertex.label=NA,
+     vertex.color=c("red", rep("lightblue", 16)))
+title("Mr. Hi")
+
+plot(k.34, vertex.label=NA,
+     vertex.color=c(rep("lightblue", 17), "red"))
+title("John A")
+
+
+```
+
+
+
+
+
+
+
+
+
