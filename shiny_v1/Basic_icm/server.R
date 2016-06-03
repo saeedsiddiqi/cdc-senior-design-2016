@@ -151,7 +151,14 @@ shinyServer(function(input, output, session) {
   
   # Plotting the output with plot_ly
   output$result <- renderPlot({
-    plot(mod())
+    plot(mod(),
+         mean.line = TRUE,
+         sim.lines = TRUE,
+         qnts = TRUE,
+         leg = TRUE,
+         popfrac = FALSE,
+         leg.cex = 1.1,
+         lwd = 3.5)
     
   }, height = function() {
     (session$clientData$output_result_width)*0.5
@@ -159,7 +166,7 @@ shinyServer(function(input, output, session) {
   
   
   # Output tab
-  output$outSummary <- renderPrint({
+  output$Summary <- renderPrint({
           if (is.na(input$timestep)) {
                   summat <- 1
           } else {
@@ -168,6 +175,20 @@ shinyServer(function(input, output, session) {
           summary(mod(),
                   at = summat)
   })
+  
+  # Incidence Plot
+  
+  output$incResult <- renderPlot({
+          plot(mod(),
+               y = "si.flow",
+               popfrac = FALSE,
+               mean.line = TRUE,
+               sim.lines = TRUE,
+               leg = TRUE,
+               leg.cex = 1.1,
+               lwd = 3.5)
+  })
+  
   
   
   # The following renderUI is used to dynamically generate the tabsets when the file is loaded.
@@ -180,10 +201,15 @@ shinyServer(function(input, output, session) {
                                                      value = 1, min = 1, max = 500))
                                  ),
                          fluidRow(
-                                 verbatimTextOutput(outputId = "outSummary"))
+                                 verbatimTextOutput(outputId = "Summary"))
+
+                ),
                 
-                
-                ))
+                tabPanel("Incidence Plot",
+                          fluidRow(
+                                  plotOutput(outputId ="incResult")
+                          ))
+                )
   })
   
 })
