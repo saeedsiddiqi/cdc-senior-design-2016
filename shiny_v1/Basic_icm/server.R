@@ -144,12 +144,10 @@ shinyServer(function(input, output, session) {
                 nsims = input$nsims)
   })
   
-  mod <- reactive({
-    input$replot
+  mod <- eventReactive(input$replot,{
     isolate(icm(param(), init(), control()))
   })
   
-  # Plotting the output with plot_ly
   output$result <- renderPlot({
     plot(mod(),
          mean.line = TRUE,
@@ -189,6 +187,16 @@ shinyServer(function(input, output, session) {
                lwd = 3.5)
   })
   
+  output$CompartPlot <- renderPlot({
+          if (is.na(input$timestep)) {
+                  summat <- 1
+          } else {
+                  summat <- input$timestep
+          }
+          comp_plot(mod(),
+                    at = summat)
+  })
+  
   
   
   # The following renderUI is used to dynamically generate the tabsets when the file is loaded.
@@ -208,7 +216,15 @@ shinyServer(function(input, output, session) {
                 tabPanel("Incidence Plot",
                           fluidRow(
                                   plotOutput(outputId ="incResult")
-                          ))
+                          )
+                         ),
+                
+                tabPanel("Compartment Plot",
+                          
+                          fluidRow(
+                                  plotOutput(outputId = "CompartPlot"))
+                          
+                          )
                 )
   })
   
