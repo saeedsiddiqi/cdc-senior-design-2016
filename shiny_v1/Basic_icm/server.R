@@ -133,13 +133,19 @@ shinyServer(function(input, output, session) {
   })
   
   init <- reactive({
-    init.icm(s.num = as.numeric(input$s.num),
-             i.num = as.numeric(input$i.num),
-             r.num=as.numeric(input$r.num))
+          
+          if (input$modelType == "SIR") {
+                  init.icm(s.num = as.numeric(input$s.num),
+                           i.num = as.numeric(input$i.num),
+                           r.num = as.numeric(input$r.num))
+          } else {
+                  init.icm(s.num = as.numeric(input$s.num),
+                           i.num = as.numeric(input$i.num), status.rand = FALSE)
+          }
   })
   
   control <- reactive({
-    control.icm(type = "SIR", 
+    control.icm(type = input$modelType, 
                 nsteps = input$nsteps, 
                 nsims = input$nsims)
   })
