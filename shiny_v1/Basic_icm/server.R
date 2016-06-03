@@ -175,7 +175,6 @@ shinyServer(function(input, output, session) {
   })
   
   # Incidence Plot
-  
   output$incResult <- renderPlot({
           plot(mod(),
                y = "si.flow",
@@ -196,7 +195,6 @@ shinyServer(function(input, output, session) {
           comp_plot(mod(),
                     at = summat)
   })
-  
   
   
   # The following renderUI is used to dynamically generate the tabsets when the file is loaded.
