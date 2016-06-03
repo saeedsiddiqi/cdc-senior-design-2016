@@ -1,13 +1,19 @@
 
 # Setting up base parameters
 # Model start:
-param <- param.icm(inf.prob = 0.2, act.rate = 0.8, rec.rate = 1/50,
-                   b.rate = 1/100, ds.rate = 1/100, di.rate = 1/90,
-                   dr.rate = 1/100)
+param <- param.icm(inf.prob = 0.2, 
+                   act.rate = 0.8, 
+                   rec.rate = 1/50,
+                   b.rate = 1/100,
+                   ds.rate = 1/100,
+                   di.rate = 1/90,
+                   dr.rate = 1/100,
+                   inter.eff = 0,
+                   inter.start = 0)
 
 init <- init.icm(s.num = 900, i.num = 100, r.num = 0)
 
-control <- control.icm(type = "SIR", nsteps = 300, nsims = 5)
+control <- control.icm(type = "SIR", nsteps = 300)
 
 output <- icm(param, init, control)
 # Model end.

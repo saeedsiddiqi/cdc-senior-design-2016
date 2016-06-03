@@ -61,7 +61,5 @@ shinyUI(navbarPage("SIR Analytical Tool V1",
                                                     uiOutput("tb")
                                             )
                                     )
-                            )),
-                   tabPanel("ICM SIR" , icon = icon("user", "fa-3x")),
-                   tabPanel("SNM SIR" , icon = icon("arrows-alt", "fa-3x"))
+                            ))
 ))
