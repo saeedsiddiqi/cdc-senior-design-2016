@@ -158,10 +158,32 @@ shinyServer(function(input, output, session) {
   })
   
   
+  # Output tab
+  output$outSummary <- renderPrint({
+          if (is.na(input$timestep)) {
+                  summat <- 1
+          } else {
+                  summat <- input$timestep
+          }
+          summary(mod(),
+                  at = summat)
+  })
+  
+  
   # The following renderUI is used to dynamically generate the tabsets when the file is loaded.
   output$tb <- renderUI({
-    tabsetPanel(type = "pills", tabPanel("Initial Parameters", tableOutput("tableinit")),
-                tabPanel("Epidemoelogical Parameters", tableOutput("tableparams")))
+    tabsetPanel(type = "pills", 
+                tabPanel("Model Output",
+                         fluidRow(
+                                 column(5,
+                                        numericInput(inputId = "timestep",label = strong("Time Step"),
+                                                     value = 1, min = 1, max = 500))
+                                 ),
+                         fluidRow(
+                                 verbatimTextOutput(outputId = "outSummary"))
+                
+                
+                ))
   })
   
 })

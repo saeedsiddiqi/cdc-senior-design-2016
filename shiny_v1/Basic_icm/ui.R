@@ -55,7 +55,7 @@ shinyUI(navbarPage("SIR Analytical Tool V1",
                               mainPanel(
                                 plotOutput(outputId = "result", height = "auto"),
                                 conditionalPanel(
-                                  h3("ICM-SIR File Inputs"),
+                                  h3("Model Summary"),
                                   condition = "output.initUpload",
                                   uiOutput("tb")
                                 )
