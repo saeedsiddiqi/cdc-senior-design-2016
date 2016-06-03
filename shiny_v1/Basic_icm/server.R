@@ -4,7 +4,6 @@
 #                        DW                         #
 #####################################################
 
-setwd("/Users/biyingfionali/Desktop/cdc-senior-design-2016/shiny_v1/Basic_icm")
 source("init/init_libraries.R")
 
 shinyServer(function(input, output, session) {
@@ -52,29 +51,10 @@ shinyServer(function(input, output, session) {
     # Reading in data 
     df.param <- read_excel(paste(inFile$datapath, ext, sep="."), 3)
     df.param <- df.param[,2:length(names(df.param))]
-    df.param <- df.param[1:8,]
+    df.param <- df.param[1:9,]
     
   })
   
-  # Model intervention
-  model.inter <- reactive({
-    
-    inFile <- input$fileIO
-    
-    if(is.null(inFile))
-      return(NULL)
-    
-    ext <- tools::file_ext(inFile$name)
-    
-    file.rename(inFile$datapath,
-                paste(inFile$datapath, ext, sep="."))
-    
-    # Reading in data 
-    df.inter <- read_excel(paste(inFile$datapath, ext, sep="."), 4)
-    df.inter <- df.inter[,2:length(names(df.inter))]
-    df.inter <- df.inter[1:2,]
-    
-  })
   
   # Update all of the sliders according to CSV inputs
   observe({
@@ -112,12 +92,8 @@ shinyServer(function(input, output, session) {
     updateSliderInput(session, "nsteps", value = model.params()$Value[8],
                       min = model.params()["Lower bound"][[1]][8], max = model.params()["Upper bound"][[1]][8])
     
-    # START INTER
-    updateSliderInput(session, "inter.eff", value = model.inter()$Value[1],
-                      min = model.inter()["Lower bound"][[1]][1], max = model.inter()["Upper bound"][[1]][1])
-    
-    updateSliderInput(session, "inter.start", value = model.inter()$Value[2],
-                      min = model.inter()["Lower bound"][[1]][2], max = model.inter()["Upper bound"][[1]][2])
+    updateSliderInput(session, "nsims", value = model.params()$Value[9],
+                      min = model.params()["Lower bound"][[1]][9], max = model.params()["Upper bound"][[1]][9])
     
   })
   
@@ -153,17 +129,19 @@ shinyServer(function(input, output, session) {
               b.rate = input$b.rate,
               ds.rate = input$ds.rate,
               di.rate = input$di.rate,
-              dr.rate = input$dr.rate,
-              inter.eff = input$inter.eff,
-              inter.start = input$inter.start)
+              dr.rate = input$dr.rate)
   })
   
   init <- reactive({
-    init.icm(s.num = input$s.num, i.num = input$i.num, r.num=input$r.num)
+    init.icm(s.num = as.numeric(input$s.num),
+             i.num = as.numeric(input$i.num),
+             r.num=as.numeric(input$r.num))
   })
   
   control <- reactive({
-    control.icm(type = "SIR", nsteps = input$nsteps)
+    control.icm(type = "SIR", 
+                nsteps = input$nsteps, 
+                nsims = input$nsims)
   })
   
   mod <- reactive({
