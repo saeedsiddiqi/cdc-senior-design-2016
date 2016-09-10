@@ -1,3 +1,4 @@
+#EXAMPLE
 source("init/init_libraries.R")
 shinyUI(navbarPage("SIR Analytical Tool V1",
                    tabPanel("DCM SIR", icon = icon("group", "fa-3x"), 
