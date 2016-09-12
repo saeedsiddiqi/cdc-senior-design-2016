@@ -12,29 +12,53 @@ shinyServer(function(input, output, session) {
         # file$datapath -> gives the path of the file
         
         
+        ##Epidemic Simulation
+        param <- reactive({
+          param.net(inf.prob = input$inf.prob,
+                    act.rate = input$act.rate,
+                    inter.start = input$inter.start,
+                    inter.eff = input$inter.eff)
+        })
+        init <- reactive({
+          init.net(i.num = input$i.num,
+                   status.rand = TRUE)
+        })
+        control <- reactive({
+          control.net(type = "SI",
+                      nsims = input$nsims,
+                      nsteps = input$nsteps,
+                      verbose = FALSE)
+        })
         
         
         # Running SIR EpiModel
         plotVal <- eventReactive(input$replot, {
                 
-                
                 avgEdges <- (input$networkSize*input$avgDegree)/2
-                
                 
                 #create network object 
                 nw <- network.initialize(n=input$networkSize, directed=FALSE)
+                
                 #sets gender attribute for nodes
                 nw <- set.vertex.attribute(nw, "Gender", sample(c(0,1),size=input$networkSize,
                                                                 prob=c(1-input$percentMales,input$percentMales),replace=TRUE))
                 #sets race attribute for nodes
-                nw <- set.vertex.attribute(nw, "Race", sample(c(0,1),size=networkSize,
+                
+
+                nw <- set.vertex.attribute(nw, "Race", sample(c(0,1),size=input$networkSize,
                                                               prob=c(1-input$percentWhite,input$percentWhite),replace=TRUE))
+                
+                #BREAK
                 #sets income attribute for nodes
                 nw <- set.vertex.attribute(nw, "Income", sample(c(0,1),size=input$networkSize,
-                                                                prob=c(1-input$percentIncome10K,input$percentIncome10K),replace=TRUE))
+                                                                prob=c(1-input$percentIncome10K,input$percentIncome10k),replace=TRUE))
+                
+                print("hahahahaha")
                 #sets incarceration attribut for nodes
                 nw <- set.vertex.attribute(nw, "Incarceration", sample(c(0,1),size=input$networkSize,
                                                                        prob=c(1-input$percentIncarcerated,input$percentIncarcerated),replace=TRUE))
+                
+                print("hahahahaha")
                 
                 #formation formula
                 formation <- ~edges
@@ -55,22 +79,22 @@ shinyServer(function(input, output, session) {
                 diagnositcs <- netdx(modelFit, nsims = input$nsims, nsteps =input$nsteps)
                 
                 # might need to add prevalance here
-                param <- param.net(inf.prob = input$inf.prob, act.rate = input$act.rate, inter.start = input$inter.start, inter.eff = input$inter.eff)
-                init <- init.net(i.num = input$i.num, status.rand = TRUE)
-                control <- control.net(type = "SI", nsteps = input$nsteps, nsims = input$nsims)
-                sim <- netsim(modelFit, param, init, control)
+                sim <- netsim(modelFit, param(), init(), control())
                 
                 
         })
         
-        # Plotting the output with plot_ly
         output$result <- renderPlot({
-                # plot(sim)
-                par(mfrow = c(1,2), mar = c(0,0,1,0))
-                plot(plotVal(), type = "network", at = 1, col.status = TRUE,
-                     main = "Prevalence at t1")
-                plot(plotVal(), type = "network", at = 500, col.status = TRUE,
-                     main = "Prevalence at t500")
+                plot(plotVal(),
+                     y = "si.flow",
+                     popfrac = FALSE,
+                     mean.line = TRUE,
+                     sim.lines = TRUE,
+                     qnts = 0.5,
+                     leg = TRUE,
+                     leg.cex = 0.5,
+                     lwd = 3.5,
+                     main = "")
                 
                 
         }, height = function() {
