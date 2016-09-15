@@ -47,11 +47,9 @@ shinyServer(function(input, output, session) {
 
                 nw <- set.vertex.attribute(nw, "Race", sample(c(0,1),size=input$networkSize,
                                                               prob=c(1-input$percentWhite,input$percentWhite),replace=TRUE))
-                
-                #BREAK
+
                 #sets income attribute for nodes
-                nw <- set.vertex.attribute(nw, "Income", sample(c(0,1),size=input$networkSize,
-                                                                prob=c(1-input$percentIncome10K,input$percentIncome10k),replace=TRUE))
+                nw <- set.vertex.attribute(nw, "Income", rbinom(0:1, input$networkSize, input$percentIncome10k))
                 
                 print("hahahahaha")
                 #sets incarceration attribut for nodes
@@ -64,7 +62,7 @@ shinyServer(function(input, output, session) {
                 formation <- ~edges
                 
                 #target stats 
-                target.stats <- c(input$avgEdges)
+                target.stats <- c(avgEdges)
                 
                 #edge dissolution
                 #edge duration same for all partnerships 
@@ -85,16 +83,12 @@ shinyServer(function(input, output, session) {
         })
         
         output$result <- renderPlot({
-                plot(plotVal(),
-                     y = "si.flow",
-                     popfrac = FALSE,
-                     mean.line = TRUE,
-                     sim.lines = TRUE,
-                     qnts = 0.5,
-                     leg = TRUE,
-                     leg.cex = 0.5,
-                     lwd = 3.5,
-                     main = "")
+          
+          par(mfrow = c(1,2), mar = c(0,0,1,0))
+          plot(plotVal(), type = "network", at = 1, col.status = TRUE,
+               main = "Prevalence at t1")
+          plot(plotVal(), type = "network", at = 100, col.status = TRUE,
+               main = "Prevalence at t500")
                 
                 
         }, height = function() {
