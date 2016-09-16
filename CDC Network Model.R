@@ -1,5 +1,7 @@
 library("EpiModel")
 
+
+#### INPUTS #####
 #parameters 
 #total number of nodes in network
 networkSize <- 196 
@@ -25,7 +27,13 @@ infProb <- 0.1
 actRate <- 5
 #initial number of nodes infected
 initInfected <- 11
+#intervention
+intRate = 1
 
+
+
+
+#### OUTPUTS ####
 
 #calculated parameters 
 avgEdges <- (networkSize*avgDegree)/2
@@ -64,7 +72,15 @@ modelFit <- netest(nw, formation, target.stats, coef.diss)
 #model diagnostics 
 diagnositcs <- netdx(modelFit, nsims = 10, nsteps =100)
 
-param <- param.net(inf.prob = infProb, act.rate = actRate)
+# might need to add prevalance here
+param <- param.net(inf.prob = infProb, act.rate = actRate, inter.start = 50,inter.eff = intRate)
 init <- init.net(i.num = initInfected, status.rand = TRUE)
 control <- control.net(type = "SI", nsteps = 500, nsims = 10)
 sim <- netsim(modelFit, param, init, control)
+
+# plot(sim)
+par(mfrow = c(1,2), mar = c(0,0,1,0))
+plot(sim, type = "network", at = 1, col.status = TRUE,
+     main = "Prevalence at t1")
+plot(sim, type = "network", at = 500, col.status = TRUE,
+     main = "Prevalence at t500")
